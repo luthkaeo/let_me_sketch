@@ -23,6 +23,11 @@ next one. Never restart an interview that has a log.
 
 ## 2. Ask first, in one thread
 
+This is the interview. The questions here are about **the project** — what is being
+built, for whom, under what constraints. `.prosona/planner-persona.md` is optional
+context about the planner; missing is the normal case, not a gap. Do not record a block
+for its absence and do not interview for it here.
+
 This is the only phase that interviews, and it is the reason the rest of the loop can
 run without asking. Runway counts the stretch between gates; this sits before GATE 1,
 so the questions here are free to the metric and expensive to skip.

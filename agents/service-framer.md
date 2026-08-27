@@ -61,8 +61,9 @@ includes `frame`. Those rows are decisions already made — apply them instead o
 re-deriving them. Read `안티 골` before writing section 6; the planner's standing
 refusals belong there without being asked again.
 
-Missing persona file → proceed, note it under `## 미해결`, and record
-`recordStop(BLOCK_CONTEXT, "planner-persona.md 없음")`. Do not stop to ask for it.
+Missing persona file → proceed silently. It is optional context, and a run without one
+is the normal case; recording a block for its absence invents a defect out of a file the
+design asked for and the work did not need.
 
 ## Discipline
 
