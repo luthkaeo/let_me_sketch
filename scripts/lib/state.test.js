@@ -377,3 +377,26 @@ test('measured values in improve mode need a stated source', () => {
     'improve 10_frame must require sources for measured constraints'
   );
 });
+
+test('checkPhaseFile accepts several files for one phase', () => {
+  // 10_frame writes two files: the target user is in the brief, the exit
+  // conditions are in the personas. Neither file alone can pass the phase.
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'prosona-pair-'));
+  const brief = path.join(dir, '10_service-brief.md');
+  const personas = path.join(dir, '20_user-personas.md');
+  fs.writeFileSync(brief, '## 1. 누구를 위한 것인가\n\n## 제약\n\n## 미해결\n', 'utf8');
+  fs.writeFileSync(personas, '- 이탈 조건: 4단계 이상이면 닫는다\n', 'utf8');
+
+  assert.strictEqual(checkPhaseFile('10_frame', brief).ok, false, 'brief alone is not the phase');
+  assert.deepStrictEqual(checkPhaseFile('10_frame', [brief, personas]), { ok: true, missing: [] });
+});
+
+test('checkPhaseFile fails a pair when one of the files is absent', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'prosona-pair-'));
+  const brief = path.join(dir, '10_service-brief.md');
+  fs.writeFileSync(brief, PHASE_REQUIREMENTS['10_frame'].join('\n\n') + '\n', 'utf8');
+
+  const result = checkPhaseFile('10_frame', [brief, path.join(dir, '20_user-personas.md')]);
+  assert.strictEqual(result.ok, false, 'a declared output that does not exist is not complete');
+  assert.ok(result.missing.includes('(file not found)'));
+});

@@ -76,17 +76,35 @@ const SCHEMA_VERSION = 1;
 
 // Returns { ok, missing } - never throws. A file that cannot be read is
 // incomplete, not an error: the loop keeps going and the gap is reported.
+//
+// Takes one path or several. One phase can produce more than one file - 10_frame
+// writes the brief and the personas, and the target user lives in the first while
+// the exit conditions live in the second. Checking them one at a time would fail a
+// phase that is actually complete, and the fix for that (duplicating the persona
+// table into the brief) puts the same fact in two files, where they drift.
 function checkPhaseFile(phase, filePath, mode = "new") {
   const required = requirementsFor(phase, mode);
+  const paths = Array.isArray(filePath) ? filePath : [filePath];
 
-  let body;
-  try {
-    body = fs.readFileSync(filePath, 'utf8');
-  } catch {
+  const bodies = [];
+  let unreadable = false;
+  for (const p of paths) {
+    try {
+      bodies.push(fs.readFileSync(p, 'utf8'));
+    } catch {
+      unreadable = true;
+    }
+  }
+
+  if (bodies.length === 0) {
     return { ok: false, missing: ['(file not found)', ...required.map(label)] };
   }
 
+  const body = bodies.join('\n');
   const missing = required.filter((r) => !satisfied(r, body)).map(label);
+  // A declared output that is absent leaves the phase incomplete even when the
+  // markers all happen to appear in its sibling.
+  if (unreadable) missing.unshift('(file not found)');
   return { ok: missing.length === 0, missing };
 }
 
