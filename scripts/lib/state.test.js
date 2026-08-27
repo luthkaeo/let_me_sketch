@@ -428,3 +428,39 @@ test('gateOpen fails closed when there is no state at all', () => {
   assert.strictEqual(gateOpen(null, '30_journey').ok, false);
   assert.strictEqual(gateOpen(null, '10_frame').ok, true, 'the first phase has no predecessor');
 });
+
+test('a new session resumes from disk at the phase after the last approved one', () => {
+  // The resume test from the plan, minus the human: run to GATE 2, drop every
+  // in-memory value, and read only what is on disk. Re-running an approved phase
+  // here is the failure the whole project exists to prevent.
+  const ws = tmpWorkspace();
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'prosona-resume-'));
+
+  const brief = path.join(dir, '10_service-brief.md');
+  const personas = path.join(dir, '20_user-personas.md');
+  const journey = path.join(dir, '30_journey.md');
+  fs.writeFileSync(brief, '## 1. 누구를 위한 것인가\n\n## 제약\n\n## 미해결\n', 'utf8');
+  fs.writeFileSync(personas, '- 이탈 조건: 4단계 이상이면 닫는다\n', 'utf8');
+  fs.writeFileSync(journey, '## 실패 경로\n\n## 내가 결정한 것\n\n## 미해결\n', 'utf8');
+
+  let s = initState(ws, { slug: 'resume-demo' });
+  s = advancePhase(s, '10_frame', {
+    status: 'approved',
+    file: brief,
+    completeness: checkPhaseFile('10_frame', [brief, personas]),
+  });
+  s = advancePhase(s, '30_journey', {
+    status: 'approved',
+    file: journey,
+    completeness: checkPhaseFile('30_journey', journey),
+  });
+  writeState(ws, s);
+
+  const resumed = readState(ws); // a new session knows nothing else
+  assert.strictEqual(resumed.currentPhase, '40_reference');
+  assert.strictEqual(resumed.phases['10_frame'].status, 'approved');
+  assert.strictEqual(resumed.phases['30_journey'].status, 'approved');
+  assert.strictEqual(resumed.runway.best, 2);
+  assert.strictEqual(gateOpen(resumed, '40_reference').ok, true);
+  assert.strictEqual(gateOpen(resumed, '60_review').ok, false, 'resume must not skip ahead either');
+});
