@@ -28,8 +28,9 @@ This phase is the one place in the loop that interviews. Runway measures the str
 *between* gates, and this sits before GATE 1 — so asking here costs nothing the metric
 counts, while a wrong frame costs every phase after it.
 
-**Q0 is a choice, and it comes first.** Offer the two modes as numbered options — 새로
-만든다 / 이미 있는 걸 고친다 — and wait for a pick. `improve` → ask for the path, read it,
+**Q0 is a choice, and it comes first.** Offer the two modes as words, never numbered —
+새로 만든다 / 고친다 — and wait for a pick, then echo it back as a word. Numbered, it was
+read backwards in a real run and the loop started in the wrong mode. `improve` → ask for the path, read it,
 and measure the as-is before anything else; the constraints are in the code, and the
 planner will recall them worse than you can measure them. Never infer the mode from how
 an idea is worded, and never take it from a command argument the planner did not type.

@@ -37,11 +37,16 @@ do not proceed until one is picked — it decides what counts as evidence for ev
 after it, and guessing it from the phrasing of an idea gets it wrong in both directions.
 
 ```
-어느 쪽인가요?
+어느 쪽인가요? (단어로 답해 주세요)
 
-  1. 새로 만든다 — 아이디어에서 시작. 제약은 당신이 말하는 것이 전부다.
-  2. 이미 있는 걸 고친다 — 코드 경로를 알려주세요. 제약을 기억이 아니라 코드에서 측정합니다.
+  새로 만든다   — 아이디어에서 시작. 제약은 당신이 말하는 것이 전부다.
+  고친다        — 이미 있는 것을 바꾼다. 코드 경로를 알려주시면 제약을 기억이 아니라
+                  코드에서 측정합니다.
 ```
+
+**Do not number these options.** Measured: numbered, the planner read "1" as the second
+option and the run started in the wrong mode. Ask for the word, and echo the pick back as
+a word — `mode = 고친다(improve), 대상 = <path>` — before the next question.
 
 This is the one blocking question in the loop. Everything after it proceeds on stated
 assumptions instead of asking.
