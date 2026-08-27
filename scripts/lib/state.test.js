@@ -10,14 +10,18 @@ const path = require('path');
 const {
   PHASES,
   STOP_CODES,
+  PHASE_REQUIREMENTS,
   initState,
   readState,
   writeState,
   advancePhase,
   recordStop,
+  checkPhaseFile,
   appendLedger,
   resolveWorkspace,
 } = require('./state');
+
+const OK = { ok: true, missing: [] };
 
 function tmpWorkspace() {
   return path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'prosona-')), '.prosona');
@@ -50,7 +54,7 @@ test('initState seeds every phase as pending and starts at the first', () => {
 test('advancePhase does not mutate its input', () => {
   const ws = tmpWorkspace();
   const s = initState(ws, { slug: 'demo', language: 'ko', intensity: 'full' });
-  const next = advancePhase(s, '10_frame', { status: 'approved', file: 'x.md' });
+  const next = advancePhase(s, '10_frame', { status: 'approved', file: 'x.md', completeness: OK });
 
   assert.strictEqual(s.phases['10_frame'].status, 'pending', 'input must be untouched');
   assert.strictEqual(next.phases['10_frame'].status, 'approved');
@@ -73,7 +77,7 @@ test('advancePhase on a non-approving status keeps currentPhase put', () => {
 test('advancePhase on the terminal phase leaves nextPhase null', () => {
   const ws = tmpWorkspace();
   let s = initState(ws, { slug: 'demo', language: 'ko', intensity: 'full' });
-  for (const p of PHASES) s = advancePhase(s, p, { status: 'approved', file: p + '.md' });
+  for (const p of PHASES) s = advancePhase(s, p, { status: 'approved', file: p + '.md', completeness: OK });
 
   assert.strictEqual(s.currentPhase, '90_handoff');
   assert.strictEqual(s.nextPhase, null);
@@ -129,8 +133,8 @@ test('an autonomous phase pass extends the runway', () => {
   let s = initState(ws, { slug: 'demo', language: 'ko', intensity: 'ultra' });
   assert.strictEqual(s.runway.current, 0);
 
-  s = advancePhase(s, '10_frame', { status: 'approved', file: 'a.md' });
-  s = advancePhase(s, '30_journey', { status: 'approved', file: 'b.md' });
+  s = advancePhase(s, '10_frame', { status: 'approved', file: 'a.md', completeness: OK });
+  s = advancePhase(s, '30_journey', { status: 'approved', file: 'b.md', completeness: OK });
 
   assert.strictEqual(s.runway.current, 2, 'each unattended pass adds one');
   assert.strictEqual(s.runway.best, 2);
@@ -139,8 +143,8 @@ test('an autonomous phase pass extends the runway', () => {
 test('a gate stop banks the runway and resets the counter', () => {
   const ws = tmpWorkspace();
   let s = initState(ws, { slug: 'demo', language: 'ko', intensity: 'ultra' });
-  s = advancePhase(s, '10_frame', { status: 'approved', file: 'a.md' });
-  s = advancePhase(s, '30_journey', { status: 'approved', file: 'b.md' });
+  s = advancePhase(s, '10_frame', { status: 'approved', file: 'a.md', completeness: OK });
+  s = advancePhase(s, '30_journey', { status: 'approved', file: 'b.md', completeness: OK });
   s = recordStop(s, { phase: '30_journey', code: 'GATE_APPROVED' });
 
   assert.strictEqual(s.runway.best, 2, 'best is banked before the reset');
@@ -151,10 +155,10 @@ test('a gate stop banks the runway and resets the counter', () => {
 test('a later shorter run does not lower the best runway', () => {
   const ws = tmpWorkspace();
   let s = initState(ws, { slug: 'demo', language: 'ko', intensity: 'ultra' });
-  s = advancePhase(s, '10_frame', { status: 'approved', file: 'a.md' });
-  s = advancePhase(s, '30_journey', { status: 'approved', file: 'b.md' });
+  s = advancePhase(s, '10_frame', { status: 'approved', file: 'a.md', completeness: OK });
+  s = advancePhase(s, '30_journey', { status: 'approved', file: 'b.md', completeness: OK });
   s = recordStop(s, { phase: '30_journey', code: 'GATE_APPROVED' });
-  s = advancePhase(s, '40_reference', { status: 'approved', file: 'c.md' });
+  s = advancePhase(s, '40_reference', { status: 'approved', file: 'c.md', completeness: OK });
   s = recordStop(s, { phase: '40_reference', code: 'GATE_APPROVED' });
 
   assert.strictEqual(s.runway.best, 2);
@@ -163,7 +167,7 @@ test('a later shorter run does not lower the best runway', () => {
 test('a BLOCK stop is recorded as a defect and also ends the runway', () => {
   const ws = tmpWorkspace();
   let s = initState(ws, { slug: 'demo', language: 'ko', intensity: 'ultra' });
-  s = advancePhase(s, '10_frame', { status: 'approved', file: 'a.md' });
+  s = advancePhase(s, '10_frame', { status: 'approved', file: 'a.md', completeness: OK });
   s = recordStop(s, {
     phase: '30_journey',
     code: 'BLOCK_CONTEXT',
@@ -211,4 +215,105 @@ test('STOP_CODES separates designed gates from defects', () => {
     'BLOCK_INPUT',
     'BLOCK_LOOP',
   ]);
+});
+
+// --- phase completeness: the RED baseline skipped whole phases in silence, so
+// --- passing a phase is a checked fact, not a claim. See docs/tests/baseline-result.md
+
+test('every phase declares what its file must contain', () => {
+  for (const p of PHASES) {
+    assert.ok(Array.isArray(PHASE_REQUIREMENTS[p]), p + ' must declare requirements');
+    assert.ok(PHASE_REQUIREMENTS[p].length > 0, p + ' requirements must not be empty');
+  }
+});
+
+test('checkPhaseFile reports every missing marker, not just the first', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'prosona-chk-'));
+  const file = path.join(dir, '10_service-brief.md');
+  fs.writeFileSync(file, '# 브리프\n\n내용만 있고 필수 절이 없다.\n', 'utf8');
+
+  const result = checkPhaseFile('10_frame', file);
+  assert.strictEqual(result.ok, false);
+  assert.deepStrictEqual(result.missing, PHASE_REQUIREMENTS['10_frame']);
+});
+
+test('checkPhaseFile passes when every marker is present', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'prosona-chk-'));
+  const file = path.join(dir, '10_service-brief.md');
+  fs.writeFileSync(file, PHASE_REQUIREMENTS['10_frame'].join('\n\n') + '\n', 'utf8');
+
+  assert.deepStrictEqual(checkPhaseFile('10_frame', file), { ok: true, missing: [] });
+});
+
+test('checkPhaseFile treats a missing file as incomplete, not as an error', () => {
+  const result = checkPhaseFile('10_frame', path.join(os.tmpdir(), 'does-not-exist-' + Date.now() + '.md'));
+  assert.strictEqual(result.ok, false);
+  assert.ok(result.missing.includes('(file not found)'));
+});
+
+test('a phase cannot be approved without a completeness result', () => {
+  const ws = tmpWorkspace();
+  const s = initState(ws, { slug: 'demo', language: 'ko', intensity: 'ultra' });
+  assert.throws(
+    () => advancePhase(s, '10_frame', { status: 'approved', file: 'a.md' }),
+    /completeness/i,
+    'approving without a check is exactly the silent phase-skip the baseline showed'
+  );
+});
+
+test('a phase cannot be approved when sections are missing', () => {
+  const ws = tmpWorkspace();
+  const s = initState(ws, { slug: 'demo', language: 'ko', intensity: 'ultra' });
+  assert.throws(
+    () => advancePhase(s, '10_frame', {
+      status: 'approved',
+      file: 'a.md',
+      completeness: { ok: false, missing: ['누구를 위한 것인가'] },
+    }),
+    /누구를 위한 것인가/,
+    'the error must name what is missing so the fix is obvious'
+  );
+});
+
+test('a verified phase approves and extends the runway', () => {
+  const ws = tmpWorkspace();
+  const s = initState(ws, { slug: 'demo', language: 'ko', intensity: 'ultra' });
+  const next = advancePhase(s, '10_frame', {
+    status: 'approved',
+    file: 'a.md',
+    completeness: { ok: true, missing: [] },
+  });
+  assert.strictEqual(next.phases['10_frame'].status, 'approved');
+  assert.strictEqual(next.runway.current, 1);
+});
+
+test('a non-approving status needs no completeness check', () => {
+  const ws = tmpWorkspace();
+  const s = initState(ws, { slug: 'demo', language: 'ko', intensity: 'ultra' });
+  const next = advancePhase(s, '10_frame', { status: 'in_progress', file: null });
+  assert.strictEqual(next.phases['10_frame'].status, 'in_progress');
+  assert.strictEqual(next.runway.current, 0);
+});
+
+test('screen specs must require the three states and the undo path', () => {
+  const req = PHASE_REQUIREMENTS['50_screens'];
+  for (const marker of ['빈 상태', '에러', '되돌리기', '## 근거']) {
+    assert.ok(req.some((r) => r.includes(marker)), '50_screens must require: ' + marker);
+  }
+});
+
+test('reference phase must require either a cited URL or an explicit no-precedent note', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'prosona-ref-'));
+
+  const cited = path.join(dir, 'cited.md');
+  fs.writeFileSync(cited, '### J1\n- 채택 [Toss](https://mobbin.com/x) — 이유\n- 기각 [Strava](https://mobbin.com/y) — 이유\n', 'utf8');
+  assert.strictEqual(checkPhaseFile('40_reference', cited).ok, true);
+
+  const declared = path.join(dir, 'declared.md');
+  fs.writeFileSync(declared, '### J1\n- 근거 없음 — 신규 설계: 국내 선례 없음\n- 기각 없음\n', 'utf8');
+  assert.strictEqual(checkPhaseFile('40_reference', declared).ok, true, 'an honest "no precedent" is a valid result');
+
+  const silent = path.join(dir, 'silent.md');
+  fs.writeFileSync(silent, '### J1\n- 이런 화면이 일반적입니다.\n', 'utf8');
+  assert.strictEqual(checkPhaseFile('40_reference', silent).ok, false, 'an unsourced assertion must not pass');
 });

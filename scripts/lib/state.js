@@ -29,8 +29,51 @@ const STOP_CODES = [
   'BLOCK_LOOP',
 ];
 
+// What a phase's output file must actually contain before the phase counts as
+// passed. This exists because of the RED baseline (docs/tests/baseline-result.md):
+// the unaided agent did not stop to ask for a target user or personas - it wrote
+// neither and moved on in silence. Silent omission leaves no trace in a stop log,
+// so completeness has to be a checked fact, not a claim.
+//
+// Alternatives (arrays inside the array) mean "any one of these satisfies it".
+const PHASE_REQUIREMENTS = {
+  '10_frame': ['누구를 위한 것인가', '## 제약', '이탈 조건', '## 미해결'],
+  '30_journey': ['## 실패 경로', '## 내가 결정한 것', '## 미해결'],
+  '40_reference': [['mobbin.com', '근거 없음'], ['기각', '기각 없음']],
+  '50_screens': ['## 근거', '빈 상태', '에러', '## 되돌리기', '## 미해결'],
+  '60_review': ['## 통과 여부', '## 이탈 조건 대조', '## 치명 결함'],
+  '90_handoff': ['## 미해결'],
+};
+
 const STATE_FILE = 'state.json';
 const SCHEMA_VERSION = 1;
+
+// Returns { ok, missing } - never throws. A file that cannot be read is
+// incomplete, not an error: the loop keeps going and the gap is reported.
+function checkPhaseFile(phase, filePath) {
+  const required = PHASE_REQUIREMENTS[phase];
+  if (!required) throw new Error(`unknown phase: ${phase}`);
+
+  let body;
+  try {
+    body = fs.readFileSync(filePath, 'utf8');
+  } catch {
+    return { ok: false, missing: ['(file not found)', ...required.map(label)] };
+  }
+
+  const missing = required.filter((r) => !satisfied(r, body)).map(label);
+  return { ok: missing.length === 0, missing };
+}
+
+function satisfied(requirement, body) {
+  return Array.isArray(requirement)
+    ? requirement.some((alt) => body.includes(alt))
+    : body.includes(requirement);
+}
+
+function label(requirement) {
+  return Array.isArray(requirement) ? requirement.join(' 또는 ') : requirement;
+}
 
 function resolveWorkspace(cwd) {
   return path.join(cwd, '.prosona');
@@ -90,11 +133,27 @@ function writeState(workspace, state) {
 
 // Advancing a phase means it cleared unattended, so it extends the runway.
 // A human touch is recorded separately, by recordStop.
-function advancePhase(state, phase, { status, file = null } = {}) {
+function advancePhase(state, phase, { status, file = null, completeness = null } = {}) {
   if (!PHASES.includes(phase)) {
     throw new Error(`unknown phase: ${phase}`);
   }
   const approved = status === 'approved';
+
+  // Fail closed. Approving without a completeness result is the silent
+  // phase-skip the baseline demonstrated, so it is not allowed to be implicit.
+  if (approved) {
+    if (!completeness) {
+      throw new Error(
+        `cannot approve ${phase}: completeness not verified - run checkPhaseFile first`
+      );
+    }
+    if (!completeness.ok) {
+      throw new Error(
+        `cannot approve ${phase}: missing ${(completeness.missing || []).join(', ')}`
+      );
+    }
+  }
+
   const entry = {
     ...state.phases[phase],
     status,
@@ -151,11 +210,13 @@ function appendLedger(workspace, slug, line) {
 module.exports = {
   PHASES,
   STOP_CODES,
+  PHASE_REQUIREMENTS,
   resolveWorkspace,
   initState,
   readState,
   writeState,
   advancePhase,
   recordStop,
+  checkPhaseFile,
   appendLedger,
 };
