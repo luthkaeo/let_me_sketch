@@ -15,7 +15,9 @@ below exists to put the domain back into the query.
 2. One journey step (`J-NNN`) → one or two queries.
 3. Shape: `"<app name> <UI elements and their relationship>"`.
 4. `platform` is the brief's target platform (`ios` | `web`), not a guess.
-5. `limit` 8 or lower. The responses carry images and the context is not free.
+5. `limit` 5 or lower and `mode: "standard"`. The responses carry screen images, and
+   `deep` with the default limit of 20 costs more context than the phase that reads it.
+   Budget 8 queries for the whole phase; a measured run needed 6 for 12 journey steps.
 
 ## Forbidden
 

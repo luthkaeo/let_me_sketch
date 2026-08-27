@@ -23,6 +23,12 @@ planning context is the point of the isolation, so do not call the MCP tools her
 
 Query rules live in `references/query-recipes.md`. Give the scout the path.
 
+**Call budget.** `mode: "standard"`, `limit` 5 or lower, and at most 8 queries for the
+whole phase. Each result carries screen images; `deep` mode with the default limit of 20
+turns one journey step into more context than the phase that consumes it. A measured run
+covered 12 journey steps with 6 queries and produced 18 cited URLs — the ceiling is not
+the constraint, thinking before querying is.
+
 ## 2. Every entry cites a link
 
 > Every entry cites a `mobbin_url` as a markdown link. An entry without a link is not a

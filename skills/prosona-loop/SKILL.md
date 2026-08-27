@@ -36,6 +36,11 @@ things:
 ceiling on how long the loop can run; a file path costs nothing and a pasted document
 costs the rest of the run.
 
+**Do not preload.** A phase agent reads its own SKILL.md, its template, and the inputs
+you named — not the other seven skills, not the libraries. Front-loading every file
+"so it has context" puts eighteen documents in the first turn and pays for them on
+every turn after.
+
 ## 3. Stop only at gates
 
 No "계속할까요?" between phases. Every stop is recorded with `recordStop`, and any stop
@@ -48,9 +53,22 @@ further.
 
 ## 4. Models are assigned, not inherited
 
-`10_frame` opus · `30_journey` sonnet · `40_reference` sonnet · `50_screens` sonnet ·
-`60_review` opus. Name the model in every dispatch. Omit it and the phase inherits the
-session model, which leaks cost quietly on the phases that need it least.
+| phase | agent | model |
+|---|---|---|
+| `10_frame` | `service-framer` | opus |
+| `30_journey` | `screen-designer` (mode=journey) | sonnet |
+| `40_reference` | `reference-scout` | sonnet |
+| `50_screens` | `screen-designer` (mode=screens) | sonnet |
+| `60_review` | `virtual-user` × personas, parallel | opus |
+| `90_handoff` | `handoff-packager` | sonnet |
+
+Name the model in every dispatch. Omit it and the phase inherits the session model.
+
+**Measured** (docs/tests/comparison.md): running all six phases inline in one opus
+context cost 22 minutes and 220k tokens for four screens. The three sonnet phases do
+most of the writing, so routing them correctly is the single largest lever — and the
+isolation that saves the tokens is the same isolation that keeps the reviewer honest.
+An inline run silently gives up both.
 
 ## 5. Stop conditions
 
