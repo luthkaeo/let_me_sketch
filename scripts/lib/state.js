@@ -45,14 +45,39 @@ const PHASE_REQUIREMENTS = {
   '90_handoff': ['## 미해결'],
 };
 
+const MODES = ['new', 'improve'];
+
+// Improving an existing product is a different job from planning a new one, and
+// the difference is not tone - it is evidence. A new idea's constraints come only
+// from what the planner says. An existing product's constraints are already in its
+// code, and the RED baseline showed an agent can measure them far better than a
+// person can recall them (token length by run count, preset counts per animal).
+//
+// So improve mode demands the as-is before it will accept a to-be. Designing a
+// new journey without reconstructing the current one is not an improvement, it is
+// a different product wearing the same name.
+const MODE_EXTRA_REQUIREMENTS = {
+  improve: {
+    '10_frame': ['## 현재 상태', '## 바꾸려는 이유', '출처'],
+    '30_journey': ['## as-is 여정', '## 변경점'],
+  },
+};
+
+function requirementsFor(phase, mode = 'new') {
+  const base = PHASE_REQUIREMENTS[phase];
+  if (!base) throw new Error(`unknown phase: ${phase}`);
+  if (!MODES.includes(mode)) throw new Error(`unknown mode: ${mode}`);
+  const extra = (MODE_EXTRA_REQUIREMENTS[mode] || {})[phase] || [];
+  return [...base, ...extra];
+}
+
 const STATE_FILE = 'state.json';
 const SCHEMA_VERSION = 1;
 
 // Returns { ok, missing } - never throws. A file that cannot be read is
 // incomplete, not an error: the loop keeps going and the gap is reported.
-function checkPhaseFile(phase, filePath) {
-  const required = PHASE_REQUIREMENTS[phase];
-  if (!required) throw new Error(`unknown phase: ${phase}`);
+function checkPhaseFile(phase, filePath, mode = "new") {
+  const required = requirementsFor(phase, mode);
 
   let body;
   try {
@@ -88,7 +113,8 @@ function nextOf(phase) {
   return i === -1 || i === PHASES.length - 1 ? null : PHASES[i + 1];
 }
 
-function initState(workspace, { slug, language = 'ko', intensity = 'full' } = {}) {
+function initState(workspace, { slug, language = 'ko', intensity = 'full', mode = 'new' } = {}) {
+  if (!MODES.includes(mode)) throw new Error(`unknown mode: ${mode}`);
   const phases = {};
   for (const p of PHASES) {
     phases[p] = { status: 'pending', file: null, approvedAt: null };
@@ -98,6 +124,7 @@ function initState(workspace, { slug, language = 'ko', intensity = 'full' } = {}
     slug,
     language,
     intensity,
+    mode,
     plannerPersona: '.prosona/planner-persona.md',
     workspace,
     phases,
@@ -211,6 +238,9 @@ module.exports = {
   PHASES,
   STOP_CODES,
   PHASE_REQUIREMENTS,
+  MODES,
+  requirementsFor,
+  label,
   resolveWorkspace,
   initState,
   readState,

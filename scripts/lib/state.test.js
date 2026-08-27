@@ -11,6 +11,9 @@ const {
   PHASES,
   STOP_CODES,
   PHASE_REQUIREMENTS,
+  MODES,
+  requirementsFor,
+  label,
   initState,
   readState,
   writeState,
@@ -316,4 +319,61 @@ test('reference phase must require either a cited URL or an explicit no-preceden
   const silent = path.join(dir, 'silent.md');
   fs.writeFileSync(silent, '### J1\n- 이런 화면이 일반적입니다.\n', 'utf8');
   assert.strictEqual(checkPhaseFile('40_reference', silent).ok, false, 'an unsourced assertion must not pass');
+});
+
+// --- project mode: a new idea and an existing product are not the same interview.
+// --- improve mode must reconstruct as-is before it is allowed to design to-be.
+
+test('MODES declares exactly the two project kinds', () => {
+  assert.deepStrictEqual(MODES, ['new', 'improve']);
+});
+
+test('initState defaults to new and records the chosen mode', () => {
+  const ws = tmpWorkspace();
+  assert.strictEqual(initState(ws, { slug: 'a' }).mode, 'new');
+  assert.strictEqual(initState(ws, { slug: 'a', mode: 'improve' }).mode, 'improve');
+});
+
+test('initState rejects an unknown mode', () => {
+  const ws = tmpWorkspace();
+  assert.throws(() => initState(ws, { slug: 'a', mode: 'refactor' }), /unknown mode/i);
+});
+
+test('improve mode requires the current state and the reason for changing it', () => {
+  const base = requirementsFor('10_frame', 'new');
+  const improve = requirementsFor('10_frame', 'improve');
+
+  assert.ok(improve.length > base.length, 'improve asks for more, never less');
+  for (const marker of ['## 현재 상태', '## 바꾸려는 이유']) {
+    assert.ok(improve.some((r) => label(r).includes(marker)), 'improve 10_frame must require ' + marker);
+    assert.ok(!base.some((r) => label(r).includes(marker)), 'new 10_frame must not require ' + marker);
+  }
+});
+
+test('improve mode requires an as-is journey and an explicit delta', () => {
+  const improve = requirementsFor('30_journey', 'improve');
+  for (const marker of ['## as-is 여정', '## 변경점']) {
+    assert.ok(improve.some((r) => label(r).includes(marker)), 'improve 30_journey must require ' + marker);
+  }
+});
+
+test('a brief that skips as-is is blocked in improve mode but passes in new mode', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'prosona-mode-'));
+  const file = path.join(dir, '10_service-brief.md');
+  fs.writeFileSync(file, requirementsFor('10_frame', 'new').map(label).join('\n\n'), 'utf8');
+
+  assert.strictEqual(checkPhaseFile('10_frame', file, 'new').ok, true);
+
+  const blocked = checkPhaseFile('10_frame', file, 'improve');
+  assert.strictEqual(blocked.ok, false);
+  assert.ok(blocked.missing.includes('## 현재 상태'), 'improve must name as-is as the gap');
+});
+
+test('measured values in improve mode need a stated source', () => {
+  // The baseline's strongest move was measuring the codebase instead of guessing.
+  // Institutionalise it rather than letting the skill regress to prose.
+  assert.ok(
+    requirementsFor('10_frame', 'improve').some((r) => label(r).includes('출처')),
+    'improve 10_frame must require sources for measured constraints'
+  );
 });
