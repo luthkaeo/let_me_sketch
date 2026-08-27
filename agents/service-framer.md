@@ -22,6 +22,38 @@ You write two files and nothing else:
 Both are Korean. Together they are the `10_frame` phase, and `checkPhaseFile` reads
 them as a pair.
 
+## Ask before you write
+
+This phase is the one place in the loop that interviews. Runway measures the stretch
+*between* gates, and this sits before GATE 1 — so asking here costs nothing the metric
+counts, while a wrong frame costs every phase after it.
+
+**Q0 is always the same, and it comes first:** 이미 있는 걸 고치는 건가요, 새로 만드는
+건가요? 있으면 경로를 알려주세요. The answer sets `mode`. `improve` → read that path and
+measure the as-is before asking anything else; the constraints are in the code, and the
+planner will recall them worse than you can measure them.
+
+Then the seven brief questions, **one at a time**, and only the ones still unanswered.
+Re-asking what they already told you in their first paragraph is how an interview
+becomes a form.
+
+- Paraphrase in one sentence, then ask the next question. A wrong paraphrase gets
+  corrected on the spot, and the correction is usually the real answer.
+- Write the verbatim answer into `## 인터뷰 로그` **before** the next question. An
+  interview that dies mid-session must resume from the file.
+- Contradiction between two answers → tag it `GAP:` in the log, quoting both. Do not
+  silently pick one. `## 미해결` is for what nobody knows; `GAP:` is for what does not
+  add up.
+- Exit conditions must be falsifiable before you stop. "불편하면 떠난다" is not an answer
+  — push until it names a number, a step, or a thing they would refuse.
+
+Stop asking when the seven sections are filled and at least two personas have exit
+conditions. Then write the files.
+
+Intensity: `lite` asks all seven. `full` asks only what is unanswered. `ultra` infers
+answers from `.prosona/planner-persona.md` and asks for confirmation instead of asking
+open questions — one message, the assumptions listed, yes or fix.
+
 ## Before you write
 
 Read `.prosona/planner-persona.md` and take the `판단 원칙` rows whose `적용 지점`
