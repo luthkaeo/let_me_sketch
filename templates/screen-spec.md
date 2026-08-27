@@ -63,8 +63,22 @@
 }
 ```
 
-노드: `stack{direction,spacing,children}` · `grid{columns,children}` · `text` `image`
+노드: `stack{direction,spacing,padding,children}` · `grid{columns,children}` · `text` `image`
 `button` `input` `divider`. Figma Auto Layout에 무손실 대응하도록 고른 형태다.
+
+**선택 속성** (없으면 기본값으로 그린다. 넣으면 값이 검사된다)
+
+| 속성 | 값 | 쓰는 이유 |
+|---|---|---|
+| `text.role` | `title` `body` `caption` `label` | 위계. 렌더와 Figma가 크기·굵기를 여기서 읽는다 |
+| `button.variant` | `primary` `secondary` `ghost` | 주 동작이 하나임을 명세에 남긴다 |
+| `image.aspect` | `16:9` 형식 | 비율이 레이아웃을 바꾸는 경우에만 |
+| `stack.padding` | 픽셀 수 | 여백이 의미를 갖는 경우에만 |
+
+색·폰트·일러스트는 명세에 넣지 않는다. 렌더는 명세의 함수이며, 렌더러가 없는 것을 예쁘게 채우면
+**명세는 비었는데 화면은 통과하는** 상태가 만들어진다.
 
 `content`가 빈 `text`/`button`/`input`은 스키마가 거부한다 — 말이 없는 노드는 플레이스홀더다.
 검증: `node scripts/check-screens.mjs <50_screens 경로>`
+시안: `node scripts/render-screens.mjs <50_screens 경로>` → `preview.html` (상태 3종 나란히)
+Figma: `node scripts/to-figma.mjs <50_screens 경로>` → `figma/*.figma.json`

@@ -104,3 +104,26 @@ test('every error names the state it came from', () => {
   const r = validateScreenSpec(s);
   assert.ok(r.errors.every((e) => /^(id|name|journey|states|empty|default|error)/.test(e)), r.errors.join(' | '));
 });
+
+test('optional visual attributes are checked when present', () => {
+  // Optional, but not free-form: a typo'd role would silently render as body text
+  // and read as a deliberate choice.
+  assert.strictEqual(validateScreenSpec(spec()).ok, true);
+
+  const bad = spec();
+  bad.states.default.tree = [{ type: 'text', role: 'heading', content: '제목' }];
+  const r = validateScreenSpec(bad);
+  assert.strictEqual(r.ok, false);
+  assert.ok(r.errors.some((e) => /unknown text role "heading"/.test(e)), r.errors.join(' | '));
+});
+
+test('a known role, variant, and aspect all pass', () => {
+  const ok = spec();
+  ok.states.default.tree = [
+    { type: 'text', role: 'title', content: '제목' },
+    { type: 'button', variant: 'ghost', content: '취소' },
+    { type: 'image', alt: '배지', aspect: '16:9' },
+    { type: 'stack', direction: 'vertical', padding: 16, children: [{ type: 'divider' }] },
+  ];
+  assert.deepStrictEqual(validateScreenSpec(ok), { ok: true, errors: [] });
+});

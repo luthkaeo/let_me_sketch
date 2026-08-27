@@ -17,6 +17,15 @@ const REQUIRED_STATES = ['default', 'empty', 'error'];
 const CONTAINER_TYPES = ['stack', 'grid'];
 const CONTENT_TYPES = ['text', 'button', 'input'];
 
+// Optional visual attributes. They exist so the renderer and the Figma converter can
+// show hierarchy without inventing it, and they stay optional on purpose: making them
+// required would break every spec already written and tax every new one. What is
+// checked is that a value, when given, is one the renderer actually knows - a typo'd
+// role would otherwise render as body text and read as a deliberate choice.
+const TEXT_ROLES = ['title', 'body', 'caption', 'label'];
+const BUTTON_VARIANTS = ['primary', 'secondary', 'ghost'];
+const ASPECT = /^\d+:\d+$/;
+
 const SCREEN_ID = /^S-[A-Za-z0-9]+$/;
 const JOURNEY_ID = /^J-[A-Za-z0-9]+$/;
 
@@ -65,6 +74,19 @@ function walk(node, where, errors) {
     errors.push(`${where}: ${node.type} needs content — a node with no words is a placeholder`);
   }
 
+  if (node.type === 'text' && node.role !== undefined && !TEXT_ROLES.includes(node.role)) {
+    errors.push(`${where}: unknown text role "${node.role}" (${TEXT_ROLES.join(', ')})`);
+  }
+  if (node.type === 'button' && node.variant !== undefined && !BUTTON_VARIANTS.includes(node.variant)) {
+    errors.push(`${where}: unknown button variant "${node.variant}" (${BUTTON_VARIANTS.join(', ')})`);
+  }
+  if (node.type === 'image' && node.aspect !== undefined && !ASPECT.test(String(node.aspect))) {
+    errors.push(`${where}: aspect must look like 16:9`);
+  }
+  if (node.type === 'stack' && node.padding !== undefined && !(node.padding >= 0)) {
+    errors.push(`${where}: padding must be a number of pixels`);
+  }
+
   if (CONTAINER_TYPES.includes(node.type)) {
     if (!Array.isArray(node.children) || node.children.length === 0) {
       errors.push(`${where}: ${node.type} has no children`);
@@ -74,4 +96,4 @@ function walk(node, where, errors) {
   }
 }
 
-module.exports = { NODE_TYPES, REQUIRED_STATES, validateScreenSpec };
+module.exports = { NODE_TYPES, REQUIRED_STATES, TEXT_ROLES, BUTTON_VARIANTS, validateScreenSpec };

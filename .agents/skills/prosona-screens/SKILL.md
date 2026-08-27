@@ -48,6 +48,14 @@ node scripts/check-screens.mjs .prosona/projects/<slug>/50_screens
 Expected: `all screen specs valid`. Then `checkPhaseFile('50_screens', <md paths>)`
 for `## 근거`, `빈 상태`, `에러`, `## 되돌리기`, `## 미해결`.
 
+```bash
+node scripts/render-screens.mjs .prosona/projects/<slug>/50_screens
+```
+
+The preview is part of the phase, not a nicety. The reference phase gathered precedent
+and this phase fixed structure — both stop at text, and a plan whose empty state was
+never looked at was never reviewed. GATE 3 presents the preview path alongside the specs.
+
 **Count the screens.** More screens than journey steps means the ladder was skipped —
 that is a defect in this phase, not a scope discovery. Go back to rung 1.
 

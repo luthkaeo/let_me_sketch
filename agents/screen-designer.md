@@ -62,11 +62,17 @@ Template: `templates/screen-spec.md`. Schema: `scripts/lib/screenspec.js`.
   states.
 - If `## 근거` is longer than `## 구조`, the screen is under-designed and the rationale
   is over-written. Rewrite the screen, not the rationale.
+- Optional visual attributes (`text.role`, `button.variant`, `image.aspect`,
+  `stack.padding`) carry hierarchy that would otherwise live only in your head. Use them
+  where they mean something; never invent colour, type, or imagery — the renderer draws
+  the spec, and a prettified gap reads as an approved decision.
 - Adopted references are cited as markdown links. No precedent → write
   `근거 없음 — 신규 설계: <이유>`. Never invent a precedent.
 
 ## Done
 
 Read the files back. Run `checkPhaseFile` for the phase, and for screens also
-`node scripts/check-screens.mjs <dir>`. Report the verified paths and the check output.
+`node scripts/check-screens.mjs <dir>` then `node scripts/render-screens.mjs <dir>`.
+Open the preview's empty and error columns before you report done — a state you never
+looked at is a state you did not design. Report the verified paths and the check output.
 Never report a phase complete against a failing check.
