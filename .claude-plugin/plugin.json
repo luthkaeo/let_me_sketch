@@ -7,5 +7,6 @@
   "keywords": ["service-planning", "persona", "user-journey", "screen-design", "mobbin", "agent-loop"],
   "skills": ["./skills/"],
   "commands": ["./commands/"],
+  "agents": ["./agents/"],
   "mcpServers": {}
 }

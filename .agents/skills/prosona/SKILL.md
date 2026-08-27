@@ -1,10 +1,3 @@
-# Prosona — Codex entry point
-
-This file mirrors the master skill so harnesses without hook injection still load it.
-Regenerate with `node scripts/sync-agents.mjs`. Do not edit between the markers.
-
-<!-- PROSONA:BEGIN -->
-
 ---
 name: prosona
 description: Use when planning a digital service, feature, or app - working out who it is for, mapping a user journey, choosing UI precedent, specifying screens, or reviewing a plan. Also use when resuming planning work started in an earlier session, and when the user says "prosona", "기획 시작", "여정 설계", or "화면 설계".
@@ -71,5 +64,3 @@ Each listed decision also goes to the ledger via `addDecision` with `why` and `d
 Empty state · error state · permission and consent flow · undo path · accessibility basics (touch target, contrast, label).
 
 Screens ship as a markdown/JSON pair. A heading with nothing under it is not a state, and the schema says so.
-
-<!-- PROSONA:END -->
