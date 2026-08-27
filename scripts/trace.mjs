@@ -5,12 +5,13 @@
 // Reads only. To keep it, redirect to a file.
 
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { join, sep } from 'node:path';
 import { createRequire } from 'node:module';
 
 const require_ = createRequire(import.meta.url);
 const { buildTrace, formatTrace } = require_('./lib/trace.js');
 const { readLedger } = require_('./lib/decisions.js');
+const { HISTORY_DIR } = require_('./lib/history.js');
 
 const dir = process.argv[2];
 if (!dir) {
@@ -26,19 +27,11 @@ const progressPath = join(dir, 'progress.md');
 const progress = existsSync(progressPath) ? readFileSync(progressPath, 'utf8') : '';
 
 // mtime is the only timestamp an archived file carries; the name holds the version.
-const history = [];
-function collect(current) {
-  for (const entry of readdirSync(current, { withFileTypes: true })) {
-    const full = join(current, entry.name);
-    if (entry.isDirectory()) {
-      collect(full);
-    } else if (current.endsWith('.history')) {
-      history.push({ file: relative(dir, full), at: statSync(full).mtime.toISOString() });
-    }
-  }
-}
+let history;
 try {
-  collect(dir);
+  history = readdirSync(dir, { recursive: true })
+    .filter((f) => f.includes(HISTORY_DIR + sep))
+    .map((f) => ({ file: f, at: statSync(join(dir, f)).mtime.toISOString() }));
 } catch {
   console.error(`cannot read ${dir}`);
   process.exit(2);

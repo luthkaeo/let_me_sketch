@@ -9,8 +9,10 @@
 const fs = require('fs');
 const path = require('path');
 
+const HISTORY_DIR = '.history';
+
 function historyDir(file) {
-  return path.join(path.dirname(file), '.history');
+  return path.join(path.dirname(file), HISTORY_DIR);
 }
 
 // Returns the archived path, or null when there was nothing to archive - the
@@ -42,4 +44,4 @@ function archive(file) {
   return target;
 }
 
-module.exports = { archive, historyDir };
+module.exports = { archive, historyDir, HISTORY_DIR };
