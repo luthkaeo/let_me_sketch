@@ -42,7 +42,9 @@ const PHASE_REQUIREMENTS = {
   '40_reference': [['mobbin.com', '근거 없음'], ['기각', '기각 없음']],
   '50_screens': ['## 근거', '빈 상태', '에러', '## 되돌리기', '## 미해결'],
   '60_review': ['## 통과 여부', '## 이탈 조건 대조', '## 치명 결함'],
-  '90_handoff': ['## 미해결'],
+  // A handoff whose only requirement is an open-questions section passes while empty,
+  // and an empty handoff is where a finished plan goes to be forgotten.
+  '90_handoff': ['## 구현 태스크', '## 산출물', '## 미해결'],
 };
 
 const MODES = ['new', 'improve'];
