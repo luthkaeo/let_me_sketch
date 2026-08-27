@@ -1,0 +1,13 @@
+{
+  "name": "prosona-dev",
+  "description": "Local development marketplace for Prosona",
+  "owner": { "name": "theo_kim" },
+  "plugins": [
+    {
+      "name": "prosona",
+      "description": "Metacognition-driven multi-persona service planning loop",
+      "version": "0.1.0",
+      "source": "./"
+    }
+  ]
+}

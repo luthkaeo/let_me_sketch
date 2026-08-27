@@ -1,0 +1,11 @@
+{
+  "name": "prosona",
+  "version": "0.1.0",
+  "description": "Metacognition-driven multi-persona service planning loop: interview once, then run brief to personas to journey to references to screens to QA with four human gates",
+  "author": { "name": "theo_kim" },
+  "license": "MIT",
+  "keywords": ["service-planning", "persona", "user-journey", "screen-design", "mobbin", "agent-loop"],
+  "skills": ["./skills/"],
+  "commands": ["./commands/"],
+  "mcpServers": {}
+}

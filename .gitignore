@@ -1,0 +1,4 @@
+node_modules/
+.prosona/
+*.log
+.DS_Store
