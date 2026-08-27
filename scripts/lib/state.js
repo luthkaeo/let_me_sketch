@@ -241,6 +241,26 @@ function recordStop(state, { phase, code, detail = null } = {}) {
   };
 }
 
+// Is the phase before this one approved? Fail closed - a missing state file, an
+// unknown phase, or a phase whose predecessor is anything other than approved all
+// return not-open. The journey phase asks this before it will run, which is the
+// master skill's HARD-GATE expressed as a check rather than as a sentence a model
+// can forget: the baseline agent did not defy the order, it simply moved on.
+//
+// The first phase has no predecessor, so it is always open.
+function gateOpen(state, phase) {
+  if (!PHASES.includes(phase)) return { ok: false, reason: `unknown phase: ${phase}` };
+  const i = PHASES.indexOf(phase);
+  if (i === 0) return { ok: true, reason: null };
+  if (!state || !state.phases) return { ok: false, reason: 'no state - cannot confirm the previous phase' };
+
+  const prior = PHASES[i - 1];
+  const status = (state.phases[prior] || {}).status;
+  return status === 'approved'
+    ? { ok: true, reason: null }
+    : { ok: false, reason: `${prior} is ${status || 'unknown'} - approve it first` };
+}
+
 function appendLedger(workspace, slug, line) {
   const dir = path.join(workspace, 'projects', slug);
   fs.mkdirSync(dir, { recursive: true });
@@ -266,5 +286,6 @@ module.exports = {
   advancePhase,
   recordStop,
   checkPhaseFile,
+  gateOpen,
   appendLedger,
 };

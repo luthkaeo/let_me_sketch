@@ -20,6 +20,7 @@ const {
   advancePhase,
   recordStop,
   checkPhaseFile,
+  gateOpen,
   appendLedger,
   resolveWorkspace,
 } = require('./state');
@@ -399,4 +400,31 @@ test('checkPhaseFile fails a pair when one of the files is absent', () => {
   const result = checkPhaseFile('10_frame', [brief, path.join(dir, '20_user-personas.md')]);
   assert.strictEqual(result.ok, false, 'a declared output that does not exist is not complete');
   assert.ok(result.missing.includes('(file not found)'));
+});
+
+test('gateOpen refuses a phase whose predecessor is not approved', () => {
+  const ws = tmpWorkspace();
+  const s = initState(ws, { slug: 'demo' });
+
+  const blocked = gateOpen(s, '30_journey');
+  assert.strictEqual(blocked.ok, false, 'a journey before an approved frame is a journey for nobody');
+  assert.match(blocked.reason, /10_frame/);
+});
+
+test('gateOpen opens once the predecessor is approved', () => {
+  const ws = tmpWorkspace();
+  const s = advancePhase(initState(ws, { slug: 'demo' }), '10_frame', {
+    status: 'approved',
+    file: '10_service-brief.md',
+    completeness: OK,
+  });
+
+  assert.deepStrictEqual(gateOpen(s, '30_journey'), { ok: true, reason: null });
+});
+
+test('gateOpen fails closed when there is no state at all', () => {
+  // readState returns null for a missing or corrupted file. Treating that as
+  // "probably fine" would let the loop skip the phase order silently.
+  assert.strictEqual(gateOpen(null, '30_journey').ok, false);
+  assert.strictEqual(gateOpen(null, '10_frame').ok, true, 'the first phase has no predecessor');
 });
