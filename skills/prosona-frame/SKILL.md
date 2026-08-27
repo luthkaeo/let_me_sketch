@@ -32,9 +32,19 @@ This is the only phase that interviews, and it is the reason the rest of the loo
 run without asking. Runway counts the stretch between gates; this sits before GATE 1,
 so the questions here are free to the metric and expensive to skip.
 
-**First question, always:** 이미 있는 걸 고치는 건가요, 새로 만드는 건가요? 있으면 경로를.
-The answer sets the mode — do not take it from a command argument when the user has not
-given one, and do not guess it from the phrasing of an idea.
+**First, the planner picks the mode.** Present it as a choice, not an open question, and
+do not proceed until one is picked — it decides what counts as evidence for every phase
+after it, and guessing it from the phrasing of an idea gets it wrong in both directions.
+
+```
+어느 쪽인가요?
+
+  1. 새로 만든다 — 아이디어에서 시작. 제약은 당신이 말하는 것이 전부다.
+  2. 이미 있는 걸 고친다 — 코드 경로를 알려주세요. 제약을 기억이 아니라 코드에서 측정합니다.
+```
+
+This is the one blocking question in the loop. Everything after it proceeds on stated
+assumptions instead of asking.
 
 Then the brief's seven, one at a time, skipping what they already told you. Answers go
 verbatim into `## 인터뷰 로그` as they arrive; contradictions get a `GAP:` tag naming

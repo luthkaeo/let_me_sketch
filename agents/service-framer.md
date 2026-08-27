@@ -28,10 +28,11 @@ This phase is the one place in the loop that interviews. Runway measures the str
 *between* gates, and this sits before GATE 1 — so asking here costs nothing the metric
 counts, while a wrong frame costs every phase after it.
 
-**Q0 is always the same, and it comes first:** 이미 있는 걸 고치는 건가요, 새로 만드는
-건가요? 있으면 경로를 알려주세요. The answer sets `mode`. `improve` → read that path and
-measure the as-is before asking anything else; the constraints are in the code, and the
-planner will recall them worse than you can measure them.
+**Q0 is a choice, and it comes first.** Offer the two modes as numbered options — 새로
+만든다 / 이미 있는 걸 고친다 — and wait for a pick. `improve` → ask for the path, read it,
+and measure the as-is before anything else; the constraints are in the code, and the
+planner will recall them worse than you can measure them. Never infer the mode from how
+an idea is worded, and never take it from a command argument the planner did not type.
 
 Then the seven brief questions, **one at a time**, and only the ones still unanswered.
 Re-asking what they already told you in their first paragraph is how an interview
