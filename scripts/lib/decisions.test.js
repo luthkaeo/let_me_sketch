@@ -147,3 +147,38 @@ test('readLedger returns an empty ledger when the file is absent or broken', () 
   fs.writeFileSync(broken, '{ not json');
   assert.deepStrictEqual(readLedger(broken), emptyLedger());
 });
+
+test('a decision can supersede an earlier one', () => {
+  // Why: the ledger recovers "why is it this way" but not "why did it change".
+  // A loopback that rewrites a screen leaves the original decision standing and
+  // silently wrong.
+  let l = registerNode(emptyLedger(), 'C-001', '무상태');
+  const first = addDecision(l, { phase: '50_screens', what: '링크를 하단에', why: 'C-001', dependsOn: ['C-001'] });
+  const second = addDecision(first.ledger, {
+    phase: '50_screens',
+    what: '링크를 상단으로',
+    why: 'P-A 이탈 조건',
+    dependsOn: ['C-001'],
+    supersedes: first.id,
+  });
+
+  const d = second.ledger.decisions.find((x) => x.id === second.id);
+  assert.strictEqual(d.supersedes, first.id);
+});
+
+test('superseding an id that is not a decision is refused', () => {
+  let l = registerNode(emptyLedger(), 'C-001', '무상태');
+  assert.throws(
+    () => addDecision(l, { phase: '50_screens', what: 'x', why: 'y', dependsOn: ['C-001'], supersedes: 'C-001' }),
+    /supersedes/
+  );
+});
+
+test('validateLedger reports a dangling supersedes', () => {
+  let l = registerNode(emptyLedger(), 'C-001', '무상태');
+  const { ledger } = addDecision(l, { phase: '50_screens', what: 'x', why: 'y', dependsOn: ['C-001'] });
+  ledger.decisions[0].supersedes = 'D-099'; // hand-edited file
+  const r = validateLedger(ledger);
+  assert.strictEqual(r.ok, false);
+  assert.ok(r.errors.some((e) => /D-099/.test(e)), r.errors.join(' | '));
+});

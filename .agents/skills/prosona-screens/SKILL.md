@@ -39,6 +39,12 @@ finished screen, and JSON with an empty `states.empty.tree` is rejected at check
 the screen, then record its design decisions with `addDecision`, hanging each off the
 reference you adopted or the journey step it serves.
 
+**Rewriting an existing screen archives it first** — `node scripts/revise.mjs <md> <json>`
+— and the decision that replaces an earlier one passes `supersedes`. Overwriting in place
+loses the version a QA round judged, and a superseding decision without the link leaves
+the overturned one standing and silently wrong. `node scripts/trace.mjs <project dir>`
+reads the result back as one timeline.
+
 ## 5. Complete when
 
 ```bash

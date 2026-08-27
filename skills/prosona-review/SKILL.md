@@ -44,6 +44,17 @@ unbounded loop is not autonomy, it is a hang.
 Record every loopback in `progress.md` with the round number and the reason, and
 `recordStop(BLOCK_LOOP, …)` on the third. The reason is what a human reads first.
 
+**Preserve what the round judged.** Before the screens phase rewrites anything, run
+
+```bash
+node scripts/revise.mjs <the .md and .json about to change>
+```
+
+QA keeps its rounds as separate files; the screens they were about do not, so a report
+ends up citing a file that no longer says what it said. A decision the round overturns is
+re-recorded with `supersedes` naming the one it replaces — the ledger then answers why
+it changed, not just why it is.
+
 ## 4. Complete when
 
 `checkPhaseFile('60_review', <report paths>)` returns ok — `## 통과 여부`,

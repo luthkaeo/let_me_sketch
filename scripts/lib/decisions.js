@@ -52,7 +52,7 @@ function nextDecisionId(ledger) {
   return 'D-' + String(n).padStart(3, '0');
 }
 
-function addDecision(ledger, { phase, what, why, dependsOn = [], affects = [], alternatives = [] } = {}) {
+function addDecision(ledger, { phase, what, why, dependsOn = [], affects = [], alternatives = [], supersedes = null } = {}) {
   if (!what) throw new Error('a decision needs `what`');
   if (!why) throw new Error('a decision needs `why` — rationale is the point of the ledger');
   if (!Array.isArray(dependsOn) || dependsOn.length === 0) {
@@ -66,6 +66,18 @@ function addDecision(ledger, { phase, what, why, dependsOn = [], affects = [], a
     }
   }
 
+  // A decision that replaces an earlier one says so. Without this the ledger
+  // recovers why a design is the way it is, but not why it changed - and a
+  // review loopback leaves the decision it overturned standing and silently wrong.
+  if (supersedes) {
+    if (parseId(supersedes).kind !== 'D') {
+      throw new Error(`supersedes must name a decision, got ${supersedes}`);
+    }
+    if (!ledger.nodes[supersedes]) {
+      throw new Error(`supersedes unknown decision ${supersedes}`);
+    }
+  }
+
   const id = nextDecisionId(ledger);
   const decision = {
     id,
@@ -75,6 +87,7 @@ function addDecision(ledger, { phase, what, why, dependsOn = [], affects = [], a
     dependsOn: [...dependsOn],
     affects: [...affects],
     alternatives: alternatives.map((a) => ({ ...a })),
+    ...(supersedes ? { supersedes } : {}),
     at: new Date().toISOString(),
   };
 
@@ -116,6 +129,9 @@ function validateLedger(ledger) {
   for (const d of ledger.decisions) {
     for (const ref of [...d.dependsOn, ...d.affects]) {
       if (!ledger.nodes[ref]) errors.push(`${d.id}: dangling reference ${ref}`);
+    }
+    if (d.supersedes && !ledger.nodes[d.supersedes]) {
+      errors.push(`${d.id}: dangling supersedes ${d.supersedes}`);
     }
     if (!d.why) errors.push(`${d.id}: missing why`);
   }
