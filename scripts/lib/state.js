@@ -13,11 +13,13 @@ const path = require('path');
 
 const PHASES = [
   '10_frame',
+  '20_policy',
   '30_journey',
   '40_reference',
   '50_screens',
   '60_review',
   '90_handoff',
+  '95_operate',
 ];
 
 const STOP_CODES = [
@@ -38,6 +40,10 @@ const STOP_CODES = [
 // Alternatives (arrays inside the array) mean "any one of these satisfies it".
 const PHASE_REQUIREMENTS = {
   '10_frame': ['누구를 위한 것인가', '## 제약', '이탈 조건', '## 미해결'],
+  // Policy is the planner's own deliverable: what the service allows, refuses,
+  // and excepts, and who gets to change it. A journey drawn without it encodes
+  // rules nobody agreed to, and support answers questions no document holds.
+  '20_policy': ['## 규칙', '## 예외', '## 결정 권한', '## 미해결'],
   '30_journey': ['## 실패 경로', '## 내가 결정한 것', '## 미해결'],
   '40_reference': [['mobbin.com', '근거 없음'], ['기각', '기각 없음']],
   '50_screens': ['## 근거', '빈 상태', '에러', '## 되돌리기', '## 미해결'],
@@ -45,6 +51,10 @@ const PHASE_REQUIREMENTS = {
   // A handoff whose only requirement is an open-questions section passes while empty,
   // and an empty handoff is where a finished plan goes to be forgotten.
   '90_handoff': ['## 구현 태스크', '## 산출물', '## 미해결'],
+  // The loop's last half. polysona's admin records an engagement target at
+  // publish and updates the persona when the real number arrives; without the
+  // same return path a 성공 지표 is a wish written at the start and never read.
+  '95_operate': ['## 지표 대조', '## 다음 회차', '## 미해결'],
 };
 
 const MODES = ['new', 'improve'];
@@ -180,7 +190,7 @@ function writeState(workspace, state) {
 
 // Advancing a phase means it cleared unattended, so it extends the runway.
 // A human touch is recorded separately, by recordStop.
-function advancePhase(state, phase, { status, file = null, completeness = null } = {}) {
+function advancePhase(state, phase, { status, file = null, completeness = null, model = null, tokens = null } = {}) {
   if (!PHASES.includes(phase)) {
     throw new Error(`unknown phase: ${phase}`);
   }
@@ -205,6 +215,11 @@ function advancePhase(state, phase, { status, file = null, completeness = null }
     ...state.phases[phase],
     status,
     file,
+    // What the phase actually cost, recorded at the moment it is known. The
+    // harness audit reads these back; a run that does not write them cannot be
+    // checked for model drift, and "no drift found" would be a false pass.
+    ...(model ? { model } : {}),
+    ...(tokens ? { tokens } : {}),
     approvedAt: approved ? now() : null,
   };
   const runway = approved
@@ -257,6 +272,8 @@ function gateOpen(state, phase) {
   if (!state || !state.phases) return { ok: false, reason: 'no state - cannot confirm the previous phase' };
 
   const prior = PHASES[i - 1];
+  // A phase the state file predates counts as not approved, never as a crash:
+  // a project mid-run must survive the loop growing a phase.
   const status = (state.phases[prior] || {}).status;
   return status === 'approved'
     ? { ok: true, reason: null }

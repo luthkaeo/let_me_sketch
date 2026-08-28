@@ -56,11 +56,16 @@ further.
 | phase | agent | model |
 |---|---|---|
 | `10_frame` | `service-framer` | opus |
+| `20_policy` | `policy-designer` | opus |
 | `30_journey` | `screen-designer` (mode=journey) | sonnet |
 | `40_reference` | `reference-scout` | sonnet |
 | `50_screens` | `screen-designer` (mode=screens) | sonnet |
 | `60_review` | `virtual-user` × personas, parallel | opus |
 | `90_handoff` | `handoff-packager` | sonnet |
+| `95_operate` | `handoff-packager` | sonnet |
+
+`PHASE_MODELS` in `scripts/lib/harness.js` is the machine-readable copy of this table,
+and the audit compares it against what each phase actually ran on.
 
 Name the model in every dispatch. Omit it and the phase inherits the session model.
 
@@ -83,7 +88,23 @@ are not runway costs, they are what keeps a long run from being a fast wrong ans
 Skipped gates still produce their `내가 결정한 것` block — it is appended to
 `progress.md` instead of being presented. The pause is removed; the judgment trail is not.
 
-## 7. Resume
+## 7. Record what the run cost
+
+Pass `model` and `tokens` to `advancePhase` for every phase. A run that does not write
+them cannot be audited, and "no drift found" on an unrecorded run is a false pass — the
+audit says `UNMEASURED` instead, on purpose.
+
+At the end of a run, and any time a phase feels expensive:
+
+```bash
+node scripts/harness.mjs
+```
+
+It names model drift, unplanned stops, cost outliers, and a loop that stopped at handoff
+without ever reading its numbers back. Each finding carries its fix, because a finding
+the next run cannot act on is a complaint.
+
+## 8. Resume
 
 Read the ledger, name the last approved phase, and start the next one. Report in two
 sentences and continue — a resume that re-asks the framing questions has already lost the

@@ -31,17 +31,6 @@ function tmpWorkspace() {
   return path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'prosona-')), '.prosona');
 }
 
-test('PHASES is the single ordered definition of the loop', () => {
-  assert.deepStrictEqual(PHASES, [
-    '10_frame',
-    '30_journey',
-    '40_reference',
-    '50_screens',
-    '60_review',
-    '90_handoff',
-  ]);
-});
-
 test('initState seeds every phase as pending and starts at the first', () => {
   const ws = tmpWorkspace();
   const s = initState(ws, { slug: 'demo', language: 'ko', intensity: 'full' });
@@ -50,7 +39,7 @@ test('initState seeds every phase as pending and starts at the first', () => {
     assert.strictEqual(s.phases[p].file, null);
   }
   assert.strictEqual(s.currentPhase, '10_frame');
-  assert.strictEqual(s.nextPhase, '30_journey');
+  assert.strictEqual(s.nextPhase, '20_policy');
   assert.strictEqual(s.slug, 'demo');
   assert.strictEqual(s.intensity, 'full');
 });
@@ -64,8 +53,8 @@ test('advancePhase does not mutate its input', () => {
   assert.strictEqual(next.phases['10_frame'].status, 'approved');
   assert.strictEqual(next.phases['10_frame'].file, 'x.md');
   assert.ok(next.phases['10_frame'].approvedAt, 'approval stamps a timestamp');
-  assert.strictEqual(next.currentPhase, '30_journey');
-  assert.strictEqual(next.nextPhase, '40_reference');
+  assert.strictEqual(next.currentPhase, '20_policy');
+  assert.strictEqual(next.nextPhase, '30_journey');
 });
 
 test('advancePhase on a non-approving status keeps currentPhase put', () => {
@@ -83,7 +72,7 @@ test('advancePhase on the terminal phase leaves nextPhase null', () => {
   let s = initState(ws, { slug: 'demo', language: 'ko', intensity: 'full' });
   for (const p of PHASES) s = advancePhase(s, p, { status: 'approved', file: p + '.md', completeness: OK });
 
-  assert.strictEqual(s.currentPhase, '90_handoff');
+  assert.strictEqual(s.currentPhase, '95_operate');
   assert.strictEqual(s.nextPhase, null);
 });
 
@@ -407,17 +396,18 @@ test('gateOpen refuses a phase whose predecessor is not approved', () => {
   const s = initState(ws, { slug: 'demo' });
 
   const blocked = gateOpen(s, '30_journey');
-  assert.strictEqual(blocked.ok, false, 'a journey before an approved frame is a journey for nobody');
-  assert.match(blocked.reason, /10_frame/);
+  assert.strictEqual(blocked.ok, false, 'a journey before an approved policy is a journey for nobody');
+  assert.match(blocked.reason, /20_policy/);
 });
 
 test('gateOpen opens once the predecessor is approved', () => {
   const ws = tmpWorkspace();
-  const s = advancePhase(initState(ws, { slug: 'demo' }), '10_frame', {
+  let s = advancePhase(initState(ws, { slug: 'demo' }), '10_frame', {
     status: 'approved',
     file: '10_service-brief.md',
     completeness: OK,
   });
+  s = advancePhase(s, '20_policy', { status: 'approved', file: '25_policy.md', completeness: OK });
 
   assert.deepStrictEqual(gateOpen(s, '30_journey'), { ok: true, reason: null });
 });
@@ -463,4 +453,61 @@ test('a new session resumes from disk at the phase after the last approved one',
   assert.strictEqual(resumed.runway.best, 2);
   assert.strictEqual(gateOpen(resumed, '40_reference').ok, true);
   assert.strictEqual(gateOpen(resumed, '60_review').ok, false, 'resume must not skip ahead either');
+});
+
+test('the loop has a policy phase and an operate phase', () => {
+  // 정책 - what is allowed, refused, and excepted - is the planner's actual
+  // deliverable and had nowhere to live. 운영 closes the loop polysona's admin
+  // closes: a target recorded at handoff and an actual read back later.
+  assert.deepStrictEqual(PHASES, [
+    '10_frame',
+    '20_policy',
+    '30_journey',
+    '40_reference',
+    '50_screens',
+    '60_review',
+    '90_handoff',
+    '95_operate',
+  ]);
+});
+
+test('a policy file must carry rules, exceptions, and who decides', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'prosona-pol-'));
+  const file = path.join(dir, '25_policy.md');
+  fs.writeFileSync(file, '# 정책\n\n아무 절도 없다\n', 'utf8');
+  const r = checkPhaseFile('20_policy', file);
+  assert.strictEqual(r.ok, false);
+  assert.ok(r.missing.includes('## 규칙'), r.missing.join(' | '));
+  assert.ok(r.missing.includes('## 예외'), r.missing.join(' | '));
+});
+
+test('an operate file must compare a target against a measured actual', () => {
+  // A success metric nobody reads back is decoration. This phase exists to
+  // make the brief's 성공 지표 a judgement instead of a wish.
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'prosona-op-'));
+  const file = path.join(dir, '95_operate.md');
+  fs.writeFileSync(file, '# 운영\n\n## 지표 대조\n\n## 다음 회차\n\n## 미해결\n', 'utf8');
+  assert.deepStrictEqual(checkPhaseFile('95_operate', file), { ok: true, missing: [] });
+});
+
+test('state written before these phases existed still resumes', () => {
+  // A project mid-run must not break because the loop grew a phase.
+  const ws = tmpWorkspace();
+  const old = initState(ws, { slug: 'legacy' });
+  delete old.phases['20_policy'];
+  delete old.phases['95_operate'];
+  writeState(ws, old);
+
+  const resumed = readState(ws);
+  assert.strictEqual(gateOpen(resumed, '30_journey').ok, false, 'an unknown predecessor is not approved');
+  assert.doesNotThrow(() => gateOpen(resumed, '20_policy'));
+});
+
+test('a phase records the model and cost the audit reads back', () => {
+  const ws = tmpWorkspace();
+  const s = advancePhase(initState(ws, { slug: 'demo' }), '10_frame', {
+    status: 'approved', file: 'x.md', completeness: OK, model: 'opus', tokens: 41234,
+  });
+  assert.strictEqual(s.phases['10_frame'].model, 'opus');
+  assert.strictEqual(s.phases['10_frame'].tokens, 41234);
 });

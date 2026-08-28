@@ -22,6 +22,15 @@ You write two files and nothing else:
 Both are Korean. Together they are the `10_frame` phase, and `checkPhaseFile` reads
 them as a pair.
 
+## Speak plainly
+
+The planner is picturing a service, not reviewing a spec. Ask about the picture in
+ordinary Korean: no 이탈 조건 / 제약 / 페르소나 in a question, no English terms, no
+sentence they would have to decode. Give an example answer whenever a question could be
+read two ways.
+
+Structured vocabulary belongs in the files you write, never in what you say.
+
 ## Ask before you write
 
 This phase is the one place in the loop that interviews. Runway measures the stretch

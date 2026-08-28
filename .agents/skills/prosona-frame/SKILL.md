@@ -21,7 +21,23 @@ where the loop stands and move on to `prosona-journey`. Present and partial → 
 `## 인터뷰 로그`, say which question you last got an answer to, and continue from the
 next one. Never restart an interview that has a log.
 
-## 2. Ask first, in one thread
+## 2. Speak the way the planner speaks
+
+Every question here is plain Korean. The planner is describing something they can
+picture; your job is to ask about that picture, not about the system that would serve it.
+
+- No jargon unless they used it first. Not 이탈 조건 / 제약 / 페르소나 — ask "어떤 상황이면
+  그냥 나가버릴까요?", "절대 이렇게는 안 됐으면 하는 게 있어요?", "이걸 누가 쓸까요?"
+- A term you truly need gets one line of plain definition first, described as what the
+  user would see or feel.
+- Offer an example answer when a question could be read two ways. "예를 들면 '3번 물어보면
+  닫는다' 처럼요."
+- A question they cannot answer is a broken question. Rephrase it or drop it and mark
+  the gap — never repeat it louder.
+
+The written artifacts keep the structured vocabulary. The conversation does not.
+
+## 3. Ask first, in one thread
 
 This is the interview. The questions here are about **the project** — what is being
 built, for whom, under what constraints. `.prosona/planner-persona.md` is optional
@@ -58,7 +74,7 @@ both sides.
 Stop when the seven sections are filled and two or more personas have falsifiable exit
 conditions — not when the user seems done answering.
 
-## 3. Mode decides what evidence counts
+## 4. Mode decides what evidence counts
 
 `new` — constraints come from what the planner says.
 
@@ -67,7 +83,7 @@ to-be: `## 현재 상태`, `## 바꾸려는 이유`, and a source for every meas
 journey drawn without the current one is not an improvement, it is a different product
 wearing the same name.
 
-## 4. Run it
+## 5. Run it
 
 Dispatch `service-framer` (opus) with the template paths, the output paths, and the
 mode. Do not paste template contents into the prompt.
@@ -77,14 +93,14 @@ The brief's seven questions come from `templates/service-brief.md`. `lite` asks 
 all seven. **No level removes GATE 1** — direction is the one thing a long runway
 cannot fix later.
 
-## 5. Do not stop after this
+## 6. Do not stop after this
 
 Between phases there are no questions — the interview ends at GATE 1. Missing input becomes a stated assumption, a
 line under `## 미해결`, and `recordStop(BLOCK_CONTEXT, <what was missing>)`. That detail
 is the improvement signal: it names what to add to the persona file or the constraint
 table so the next run goes further without asking.
 
-## 6. Complete when
+## 7. Complete when
 
 `checkPhaseFile('10_frame', ['10_service-brief.md', '20_user-personas.md'], mode)`
 returns ok. The two files are checked as a pair — the target user lives in the first,
@@ -93,7 +109,7 @@ the exit conditions in the second.
 Then GATE 1, in the master skill's format: the two paths, three decisions with the
 constraint or persona ID each hangs off, and the open questions.
 
-## 7. What the next phases will hold you to
+## 8. What the next phases will hold you to
 
 - `제약` table → every later phase checks itself against it
 - `이탈 조건` → the QA phase scores screens against these sentences literally

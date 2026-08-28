@@ -35,19 +35,32 @@ the constraint, thinking before querying is.
 > reference, it is a guess. If Mobbin returns nothing usable for a journey step, record
 > that explicitly as `근거 없음 — 신규 설계` and move on; do not invent a precedent.
 
-## 3. Rejections are required
+## 3. Judge on two axes, not one
+
+A candidate is adopted or rejected against **both**:
+
+1. **This service's own constraints** — a `C-NNN` or a `P-X` exit condition, quoted.
+2. **General UX principle** — what the pattern does to attention, effort, and recovery.
+   Order matters more than presence: the same suggestion chips adopted *after* an answer
+   and rejected *before* it are the same component making opposite promises.
+
+One axis alone produces plausible mistakes. Constraints alone accept a pattern that fits
+the rules and reads badly; principle alone accepts a beautiful pattern this service
+cannot serve. Name both in the line you write.
+
+## 4. Rejections are required
 
 A step with only adoptions was not compared. The rejection line — what was turned down
 and which constraint or exit condition it collided with — is the design judgment the
 screens phase actually reads.
 
-## 4. No MCP is not a failure
+## 5. No MCP is not a failure
 
 Mobbin unavailable or unauthorized → write `MCP 미연결 — 신규 설계로 진행` for each step,
 note it under `## 미해결`, record `BLOCK_CONTEXT`, and finish the file. Hard-failing here
 would cost a whole runway for a phase that is not a gate.
 
-## 5. Complete when
+## 6. Complete when
 
 `checkPhaseFile('40_reference', '40_references.md')` returns ok — a cited URL or an
 explicit no-precedent note, and a rejection or an explicit `기각 없음`.
