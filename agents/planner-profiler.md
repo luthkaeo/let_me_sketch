@@ -1,7 +1,7 @@
 ---
 name: planner-profiler
 description: Interviews a planner about their own decision principles and writes .prosona/planner-persona.md. Use once per planner, before any service planning phase, or to resume an interview that was cut short.
-tools: Read, Write, Edit
+tools: Read, Write, Edit, Bash
 model: opus
 ---
 

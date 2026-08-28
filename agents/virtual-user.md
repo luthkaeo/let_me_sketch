@@ -1,7 +1,7 @@
 ---
 name: virtual-user
 description: Plays one target persona in first person against the drafted screens and reports where that person gets stuck or leaves. Use for the 60_review phase, one instance per persona.
-tools: Read, Write
+tools: Read, Write, Bash
 model: opus
 ---
 
