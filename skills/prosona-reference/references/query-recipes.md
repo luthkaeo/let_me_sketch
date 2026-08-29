@@ -5,7 +5,7 @@ platform)`, `search_sections(query)` — and no domain or category filter. Every
 below exists to put the domain back into the query.
 
 > **Tool names differ per install.** They may carry a server instance id, e.g.
-> `mcp__463aaef4-…__search_screens`. List the available MCP tools (or check
+> `mcp__<server-id>__search_screens`. List the available MCP tools (or check
 > `ListMcpResources`) and match on the suffix rather than hardcoding a uuid.
 
 ## Building a query
