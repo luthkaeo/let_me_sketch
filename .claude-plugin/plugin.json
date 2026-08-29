@@ -1,11 +1,25 @@
 {
   "name": "prosona",
   "version": "0.2.0",
-  "description": "Metacognition-driven multi-persona service planning loop: interview once, then run brief to personas to journey to references to screens to QA with four human gates",
-  "author": { "name": "theo_kim" },
+  "description": "Service planning loop: plain-language interview, policy and rules, journeys, Mobbin-cited screen specs, persona QA, and an operating feedback loop. Plans only - never writes code.",
+  "author": {
+    "name": "luthkaeo"
+  },
   "license": "MIT",
-  "keywords": ["service-planning", "persona", "user-journey", "screen-design", "mobbin", "agent-loop"],
-  "skills": ["./skills/"],
-  "commands": ["./commands/"],
-  "mcpServers": {}
+  "keywords": [
+    "service-planning",
+    "persona",
+    "user-journey",
+    "screen-design",
+    "mobbin",
+    "agent-loop"
+  ],
+  "skills": [
+    "./skills/"
+  ],
+  "commands": [
+    "./commands/"
+  ],
+  "mcpServers": {},
+  "homepage": "https://github.com/luthkaeo/let_me_sketch"
 }

@@ -12,11 +12,11 @@ Korean documentation: [README.ko.md](README.ko.md)
 ## Install
 
 ```bash
-claude plugin marketplace add /path/to/prosona
+claude plugin marketplace add luthkaeo/let_me_sketch
 ```
 
 ```bash
-claude plugin install prosona@prosona-dev
+claude plugin install prosona@prosona
 ```
 
 ## The loop

@@ -22,11 +22,11 @@
 ## 설치
 
 ```bash
-claude plugin marketplace add /경로/prosona
+claude plugin marketplace add luthkaeo/let_me_sketch
 ```
 
 ```bash
-claude plugin install prosona@prosona-dev
+claude plugin install prosona@prosona
 ```
 
 ## 루프

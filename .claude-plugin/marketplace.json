@@ -1,13 +1,20 @@
 {
-  "name": "prosona-dev",
-  "description": "Local development marketplace for Prosona",
-  "owner": { "name": "theo_kim" },
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "prosona",
+  "description": "A service-planning loop that interviews you in plain language and audits its own run.",
+  "owner": { "name": "luthkaeo" },
+  "version": "0.2.0",
   "plugins": [
     {
       "name": "prosona",
-      "description": "Metacognition-driven multi-persona service planning loop",
+      "description": "Plain-language interview, policy and business rules, user journeys, Mobbin-cited screen specs, persona QA, and an operating loop that reads real numbers back into the plan. Plans only - never writes code.",
       "version": "0.2.0",
-      "source": "./"
+      "author": { "name": "luthkaeo" },
+      "source": "./",
+      "category": "productivity",
+      "homepage": "https://github.com/luthkaeo/let_me_sketch",
+      "license": "MIT",
+      "tags": ["service-planning", "product-planning", "policy-design", "user-journey", "screen-spec", "mobbin", "decision-ledger", "agent-loop"]
     }
   ]
 }
