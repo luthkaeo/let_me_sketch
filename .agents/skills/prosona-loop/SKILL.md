@@ -69,7 +69,7 @@ and the audit compares it against what each phase actually ran on.
 
 Name the model in every dispatch. Omit it and the phase inherits the session model.
 
-**Measured** (docs/tests/comparison.md): running all six phases inline in one opus
+**Measured**: running every phase inline in one opus
 context cost 22 minutes and 220k tokens for four screens. The three sonnet phases do
 most of the writing, so routing them correctly is the single largest lever — and the
 isolation that saves the tokens is the same isolation that keeps the reviewer honest.

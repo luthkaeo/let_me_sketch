@@ -32,7 +32,7 @@ const STOP_CODES = [
 ];
 
 // What a phase's output file must actually contain before the phase counts as
-// passed. This exists because of the RED baseline (docs/tests/baseline-result.md):
+// passed. This exists because of a measured baseline run:
 // the unaided agent did not stop to ask for a target user or personas - it wrote
 // neither and moved on in silence. Silent omission leaves no trace in a stop log,
 // so completeness has to be a checked fact, not a claim.

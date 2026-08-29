@@ -211,7 +211,7 @@ test('STOP_CODES separates designed gates from defects', () => {
 });
 
 // --- phase completeness: the RED baseline skipped whole phases in silence, so
-// --- passing a phase is a checked fact, not a claim. See docs/tests/baseline-result.md
+// --- passing a phase is a checked fact, not a claim. See the measured baseline
 
 test('every phase declares what its file must contain', () => {
   for (const p of PHASES) {

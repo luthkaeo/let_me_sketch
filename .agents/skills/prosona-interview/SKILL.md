@@ -9,7 +9,7 @@ license: MIT
 > **This is not the project interview.** Questions about what you are building, who it is
 > for, and what constrains it belong to `prosona-frame`, which asks them before GATE 1.
 > This skill is optional and off the critical path: the loop runs to completion without it
-> (measured — docs/tests/green-result.md), so invoke it only when a planner explicitly
+> (measured), so invoke it only when a planner explicitly
 > wants their own decision principles captured.
 
 Produces `.prosona/planner-persona.md` — one file per planner, not per project. Later
