@@ -6,7 +6,7 @@ license: MIT
 
 # Prosona Handoff
 
-Phase `90_handoff`. Produces `90_handoff.md`. Last phase, no gate — GATE 4 already
+Phase `90_handoff`. Produces `90_handoff.md`. Last phase, no gate — GATE 5 already
 decided whether the plan is sound, and asking again here only costs runway.
 
 ## 1. Gate first

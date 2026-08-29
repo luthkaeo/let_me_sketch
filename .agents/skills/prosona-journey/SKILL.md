@@ -6,9 +6,9 @@ license: MIT
 
 # Prosona Journey
 
-Phase `30_journey`. Produces `30_journey.md`, then **GATE 2**.
+Phase `30_journey`. Produces `30_journey.md`, then **GATE 3**.
 
-## 1. Refuse to start before GATE 1
+## 1. Refuse to start before GATE 2
 
 Read `.prosona/state.json` and call `gateOpen(state, '30_journey')`. Not open → stop and
 send the caller to `prosona-frame`. Say which file is missing and why the order matters
@@ -49,10 +49,10 @@ Also true before you call it done, and not checked by string matching:
 - every decision row quotes a `C-NNN` or a `P-X`
 - `addDecision` accepted each one (it refuses a decision that depends on nothing)
 
-Then GATE 2 in the master skill's format.
+Then GATE 3 in the master skill's format.
 
 ## 5. `ultra`
 
-GATE 2 is skipped, the phase is not. The `내가 결정한 것` block is written and appended
+GATE 3 is skipped, the phase is not. The `내가 결정한 것` block is written and appended
 to `progress.md` instead of being presented, so the planner can reconstruct the
 judgment trail afterwards. Skipping the gate removes the pause, never the record.

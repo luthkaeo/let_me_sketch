@@ -7,7 +7,7 @@ license: MIT
 # Prosona Screens
 
 Phase `50_screens`. Produces `50_screens/<NN>-<slug>.md` **and its `.json`**, then
-**GATE 3**.
+**GATE 4**.
 
 ## 1. Gate first
 
@@ -60,12 +60,12 @@ node scripts/render-screens.mjs .prosona/projects/<slug>/50_screens
 
 The preview is part of the phase, not a nicety. The reference phase gathered precedent
 and this phase fixed structure — both stop at text, and a plan whose empty state was
-never looked at was never reviewed. GATE 3 presents the preview path alongside the specs.
+never looked at was never reviewed. GATE 4 presents the preview path alongside the specs.
 
 **Count the screens.** More screens than journey steps means the ladder was skipped —
 that is a defect in this phase, not a scope discovery. Go back to rung 1.
 
-Then GATE 3. Under `ultra` the gate is skipped and the decision block is appended to
+Then GATE 4. Under `ultra` the gate is skipped and the decision block is appended to
 `progress.md` instead; the checks are not skipped at any level.
 
 ## 6. Never simplify away

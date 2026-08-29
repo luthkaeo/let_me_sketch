@@ -82,7 +82,7 @@ Gate rejected · third review loopback (`BLOCK_LOOP`) · a required input file a
 
 ## 6. `ultra`
 
-GATE 2 and GATE 3 are skipped; GATE 1 and GATE 4 never are. Direction and verification
+GATE 2, GATE 3 and GATE 4 are skipped; GATE 1 (direction) and GATE 5 (verification) never are. Direction and verification
 are not runway costs, they are what keeps a long run from being a fast wrong answer.
 
 Skipped gates still produce their `내가 결정한 것` block — it is appended to

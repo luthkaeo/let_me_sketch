@@ -6,9 +6,9 @@ license: MIT
 
 # Prosona Review
 
-Phase `60_review`. Produces `60_qa/<persona>-<iteration>.md`, then **GATE 4**.
+Phase `60_review`. Produces `60_qa/<persona>-<iteration>.md`, then **GATE 5**.
 
-GATE 4 survives every intensity level. A long runway in the wrong direction is not
+GATE 5 survives every intensity level. A long runway in the wrong direction is not
 runway, and this is the only phase that can tell the difference.
 
 ## 1. Three rounds, three lenses
@@ -61,7 +61,7 @@ it changed, not just why it is.
 `## 이탈 조건 대조`, `## 치명 결함` — for every persona's latest report, and no report is
 불합격.
 
-Then GATE 4: verdicts per persona, the fatal defects fixed and how, and what was
+Then GATE 5: verdicts per persona, the fatal defects fixed and how, and what was
 knowingly left open.
 
 ## 5. Judge against the exit conditions
